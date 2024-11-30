@@ -1,0 +1,57 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-prometheus:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy KUBECONFIG
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Install kubectl and helm
+        run: |
+          curl -LO https://dl.k8s.io/release/`curl -LS https://dl.k8s.io/release/stable.txt`/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          mv ./kubectl /usr/local/bin/kubectl
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+
+      - name: Deploy Prometheus
+        run: |
+          export KUBECONFIG=~/.kube/config
+          helm list -n monitoring
+          kubectl get pods -n monitoring
+          helm upgrade --install prometheus oci://registry-1.docker.io/bitnamicharts/prometheus -f helm/prometheus-values.yaml --namespace monitoring --create-namespace
+          helm list -n monitoring
+          kubectl get pods -n monitoring
+
+      - name: Check if state-metrics is installed
+        run: |
+          if helm list -q -n monitoring | grep -w "state-metrics"; then
+              echo "state-metrics is already installed"
+          else
+              echo "state-metrics is not installed"
+              helm install state-metrics oci://registry-1.docker.io/bitnamicharts/kube-state-metrics --namespace monitoring
+          fi
+
+      - name: Check if node-exporter is installed
+        run: |
+          if helm list -q -n monitoring | grep -w "node-exporter"; then
+              echo "node-exporter is already installed"
+          else
+              echo "node-exporter is not installed"
+              helm install node-exporter oci://registry-1.docker.io/bitnamicharts/prometheus-node-exporter --namespace monitoring
+          fi
