@@ -9,18 +9,7 @@ on:
       - main
 
 jobs:
-  # setup-kubernetes:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Install Required Tools
-  #       run: |
-  #         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-  #         chmod +x ./kubectl
-  #         sudo mv ./kubectl /usr/local/bin/kubectl
-  #         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
   deploy-monitoring-stack:
-    # needs: setup-kubernetes
     runs-on: ubuntu-latest
     env:
       NAMESPACE: monitoring
@@ -63,4 +52,3 @@ jobs:
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus -n ${NAMESPACE} --timeout=300s
           helm list -n ${NAMESPACE}
           kubectl get pods -n ${NAMESPACE}
-
