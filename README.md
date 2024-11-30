@@ -43,6 +43,8 @@ In this task, you will install Prometheus on your Kubernetes (K8s) cluster using
 
 3. **Configure Prometheus**
    - Customize Prometheus to scrape metrics from the installed exporters by editing the configuration file. Update the values.yaml file for the Helm chart or use ```--set``` flags during installation/upgrades.
+   
+   - Example for adding a scrape target:
      
      ``` yaml
      extraScrapeConfigs: | 
@@ -60,7 +62,8 @@ In this task, you will install Prometheus on your Kubernetes (K8s) cluster using
     helm upgrade prometheus oci://registry-1.docker.io/bitnamicharts/prometheus -f helm/prometheus-values.yaml
     ```
 
-Example for adding a scrape target:
+
+
 4. **Verify Metrics Collection**
    
     After deployment, verify that Prometheus is collecting metrics as expected.

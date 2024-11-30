@@ -9,49 +9,58 @@ on:
       - main
 
 jobs:
-  deploy-prometheus:
+  # setup-kubernetes:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Install Required Tools
+  #       run: |
+  #         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  #         chmod +x ./kubectl
+  #         sudo mv ./kubectl /usr/local/bin/kubectl
+  #         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+  deploy-monitoring-stack:
+    # needs: setup-kubernetes
     runs-on: ubuntu-latest
+    env:
+      NAMESPACE: monitoring
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Copy KUBECONFIG
+      - name: Setup Kubernetes Config
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Install kubectl and helm
-        run: |
-          curl -LO https://dl.k8s.io/release/`curl -LS https://dl.k8s.io/release/stable.txt`/bin/linux/amd64/kubectl
-          chmod +x ./kubectl
-          mv ./kubectl /usr/local/bin/kubectl
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-
       - name: Deploy Prometheus
         run: |
-          export KUBECONFIG=~/.kube/config
-          helm list -n monitoring
-          kubectl get pods -n monitoring
-          helm upgrade --install prometheus oci://registry-1.docker.io/bitnamicharts/prometheus -f helm/prometheus-values.yaml --namespace monitoring --create-namespace
-          helm list -n monitoring
-          kubectl get pods -n monitoring
+          helm upgrade --install prometheus \
+            oci://registry-1.docker.io/bitnamicharts/prometheus \
+            -f helm/prometheus-values.yaml \
+            --namespace ${NAMESPACE} \
+            --create-namespace
 
-      - name: Check if state-metrics is installed
+      - name: Deploy Kube State Metrics
         run: |
-          if helm list -q -n monitoring | grep -w "state-metrics"; then
-              echo "state-metrics is already installed"
-          else
-              echo "state-metrics is not installed"
-              helm install state-metrics oci://registry-1.docker.io/bitnamicharts/kube-state-metrics --namespace monitoring
+          if ! helm list -q -n ${NAMESPACE} | grep -w "state-metrics"; then
+            helm install state-metrics \
+              oci://registry-1.docker.io/bitnamicharts/kube-state-metrics \
+              --namespace ${NAMESPACE}
           fi
 
-      - name: Check if node-exporter is installed
+      - name: Deploy Node Exporter
         run: |
-          if helm list -q -n monitoring | grep -w "node-exporter"; then
-              echo "node-exporter is already installed"
-          else
-              echo "node-exporter is not installed"
-              helm install node-exporter oci://registry-1.docker.io/bitnamicharts/prometheus-node-exporter --namespace monitoring
+          if ! helm list -q -n ${NAMESPACE} | grep -w "node-exporter"; then
+            helm install node-exporter \
+              oci://registry-1.docker.io/bitnamicharts/prometheus-node-exporter \
+              --namespace ${NAMESPACE}
           fi
+
+      - name: Verify Deployment
+        run: |
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus -n ${NAMESPACE} --timeout=300s
+          helm list -n ${NAMESPACE}
+          kubectl get pods -n ${NAMESPACE}
+
