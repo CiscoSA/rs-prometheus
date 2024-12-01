@@ -87,3 +87,7 @@ In this task, you will install Prometheus on your Kubernetes (K8s) cluster using
 
       - Pod Status: ```kube_pod_status_phase```
 
+
+     Access to Prometheus is secured through Nginx proxying, with the added protection of a Let's Encrypt certificate. Nginx is installed on the bastion host and is configured to proxy only Grafana, not Prometheus. This setup provides an additional layer of protection for Prometheus, effectively preventing unauthorized access to the application.
+
+     URL for accessing Grafana: https://rs-test.cloudns.cl/
