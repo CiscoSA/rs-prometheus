@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-monitoring-stack:
+    runs-on: ubuntu-latest
+    env:
+      NAMESPACE: monitoring
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Kubernetes Config
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy Prometheus
+        run: |
+          helm upgrade --install prometheus \
+            oci://registry-1.docker.io/bitnamicharts/prometheus \
+            -f helm/prometheus-values.yaml \
+            --namespace ${NAMESPACE} \
+            --create-namespace
+
+      - name: Deploy Kube State Metrics
+        run: |
+          if ! helm list -q -n ${NAMESPACE} | grep -w "state-metrics"; then
+            helm install state-metrics \
+              oci://registry-1.docker.io/bitnamicharts/kube-state-metrics \
+              --namespace ${NAMESPACE}
+          fi
+
+      - name: Deploy Node Exporter
+        run: |
+          if ! helm list -q -n ${NAMESPACE} | grep -w "node-exporter"; then
+            helm install node-exporter \
+              oci://registry-1.docker.io/bitnamicharts/prometheus-node-exporter \
+              --namespace ${NAMESPACE}
+          fi
+
+      - name: Verify Deployment
+        run: |
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus -n ${NAMESPACE} --timeout=300s
+          helm list -n ${NAMESPACE}
+          kubectl get pods -n ${NAMESPACE}
