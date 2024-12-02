@@ -19,8 +19,7 @@
      
      Of course, it is possible to have direct access to Prometheus from the Internet, and I am providing a screenshot as proof. However, this is a temporary solution and is not advisable due to security concerns.
 
-     All further work with Prometheus will be conducted through a secure tunnel to ensure better protection and prevent unauthorized access.
-
+     
      ![](Screenshots/14.png)
 
      ![](Screenshots/12.png)
@@ -32,16 +31,19 @@
   
   ![](Screenshots/11.png)
 
+
+4. **Metrics Collection (35 points)**
+   - Prometheus is collecting essential cluster-specific metrics, such as nodes' memory usage.
+     
+     All further work with Prometheus will be conducted through a secure tunnel to ensure better protection and prevent unauthorized access.
+
   ![](Screenshots/02.png)
   ![](Screenshots/03.png)
+
   ![](Screenshots/07.png)
   ![](Screenshots/08.png)
   ![](Screenshots/09.png)
   ![](Screenshots/10.png)
-
-4. **Metrics Collection (35 points)**
-   - Prometheus is collecting essential cluster-specific metrics, such as nodes' memory usage.
-
   ![](Screenshots/04.png)
   ![](Screenshots/05.png)
   ![](Screenshots/06.png)
