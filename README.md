@@ -16,6 +16,16 @@
 
 3. **Web interface is available (10 points)**
    - Metrics can be checked via Prometheus web interface.
+     
+     Of course, it is possible to have direct access to Prometheus from the Internet, and I am providing a screenshot as proof. However, this is a temporary solution and is not advisable due to security concerns.
+
+     All further work with Prometheus will be conducted through a secure tunnel to ensure better protection and prevent unauthorized access.
+
+     ![](Screenshots/14.png)
+
+     ![](Screenshots/12.png)
+     
+
      Access to Prometheus is secured through Nginx proxying, with the added protection of a Let's Encrypt certificate. Nginx is installed on the bastion host and is configured to proxy only Grafana, not Prometheus. This setup provides an additional layer of protection for Prometheus, effectively preventing unauthorized access to the application.
 
      A screenshot of the Grafana dashboard has been included, along with the URL for accessing Grafana: https://rs-test.cloudns.cl/
