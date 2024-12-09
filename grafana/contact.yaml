@@ -1,0 +1,11 @@
+apiVersion: 1
+contactPoints:
+    - orgId: 1
+      name: grafana-default-email
+      receivers:
+        - uid: be6ek79gu2n7kd
+          type: email
+          settings:
+            addresses: HIDDEN@google.com
+            singleEmail: false
+          disableResolveMessage: false

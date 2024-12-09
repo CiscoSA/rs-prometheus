@@ -1,0 +1,8 @@
+smtp:
+  enabled: true
+  host: "HIDDEN:25"
+  skip_verify: true
+  from_address: "grafana@example.com"
+  from_name: "Grafana Alerts"
+  user: "HIDDEN"
+  password: "HIDDEN"

@@ -1,0 +1,179 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: MyGroup
+      folder: MyAlerts
+      interval: 1m
+      rules:
+        - uid: ee6fat9xzbabkb
+          title: Memory Utilization
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ae6bw40gek0zkd
+              model:
+                adhocFilters: []
+                datasource:
+                    type: prometheus
+                    uid: ae6bw40gek0zkd
+                editorMode: code
+                expr: ((sum(node_memory_MemTotal_bytes{instance=~"node.*"}) - sum(node_memory_MemFree_bytes{instance=~"node.*"}) - sum(node_memory_Buffers_bytes{instance=~"node.*"}) - sum(node_memory_Cached_bytes{instance=~"node.*"})) / sum(node_memory_MemTotal_bytes{instance=~"node.*"})) * 100
+                interval: ""
+                intervalMs: 15000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: true
+                refId: A
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 50
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: ce6bwv69f5logf
+          panelId: 12
+          noDataState: NoData
+          execErrState: Error
+          for: 1m
+          annotations:
+            __dashboardUid__: ce6bwv69f5logf
+            __panelId__: "12"
+            description: Memory Utilization > 50%
+            runbook_url: https://rs-test.cloudns.cl/
+            summary: Memory Utilization
+          isPaused: false
+          notification_settings:
+            receiver: grafana-default-email
+        - uid: ae6fax4mjda80d
+          title: CPU Utilization
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: ae6bw40gek0zkd
+              model:
+                adhocFilters: []
+                datasource:
+                    type: prometheus
+                    uid: ae6bw40gek0zkd
+                editorMode: code
+                expr: sum(rate(node_cpu_seconds_total{mode="user", instance=~"node.*"}[2m])) * 200
+                interval: ""
+                intervalMs: 15000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: true
+                refId: A
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 50
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: ce6bwv69f5logf
+          panelId: 11
+          noDataState: NoData
+          execErrState: Error
+          for: 1m
+          annotations:
+            __dashboardUid__: ce6bwv69f5logf
+            __panelId__: "11"
+            description: CPU Utilization > 50%
+            runbook_url: https://rs-test.cloudns.cl/
+            summary: CPU Utilization
+          isPaused: false
+          notification_settings:
+            receiver: grafana-default-email
